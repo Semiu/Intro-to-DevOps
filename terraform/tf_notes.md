@@ -1,8 +1,10 @@
 ### Intro
 Terraform is for provisioning infrastructure, while tools like Ansible, Chef, Puppet are for installation and configuration of the software.
-Terraform works well with software automation tool like Ansible, anyway. 
+Terraform works well with software automation tool like Ansible, anyway. Jenkins is used in automating building, testing and deploying software. 
 
-Jenkins is used in automating building, testing and deploying software. 
+### Notes
+ - Data sources can be defined and reused in another resource by using the dot`[.]` operation as access pointer. For example, `data.ami_virtual.ubuntu.id` is pointing to a data map defined, named `data` and with `ami_virtual` and `ubuntu` as identifiers.
+ - url{https://registry.terraform.io/} is a resource for samples of this data sources.
 
 
 ### Commands and their uses
