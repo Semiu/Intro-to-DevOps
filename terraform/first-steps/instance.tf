@@ -1,11 +1,17 @@
-// credentials locally stored
+# credentials locally stored
+
+variable "aws_region" {
+  type    = string
+  default = "us-west-2"
+}
+
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }
 
 data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["679593333241"]
+  owners      = ["099720109477"]
 
   filter {
     name   = "name"
@@ -19,7 +25,7 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_instance" "example" {
-  ami           = data.aws_ami.ubuntu.id //"ami-0d729a60" is a type of instance that. Can be passed from another resource especially data source
+  ami           = data.aws_ami.ubuntu.id # "ami-0d729a60" is a type of instance that can be passed from another resource especially data source
   instance_type = "t2.micro"
   tags = {
     Name = "example"
