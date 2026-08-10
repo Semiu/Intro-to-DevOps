@@ -1,32 +1,11 @@
 # credentials locally stored
-
-variable "aws_region" {
-  type    = string
-  default = "us-west-2"
-}
-
 provider "aws" {
-  region = var.aws_region
-}
-
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  owners      = ["099720109477"]
-
-  filter {
-    name   = "name"
-    values = ["ubuntu-minimal/images/hvm-ssd/ubuntu-focal-20.04-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
+  region = var.aws_region["east"] # from a map type. Can also do var.aws_region.east
 }
 
 resource "aws_instance" "example" {
   ami           = data.aws_ami.ubuntu.id # "ami-0d729a60" is a type of instance that can be passed from another resource especially data source
-  instance_type = "t2.micro"
+  instance_type = var.instance_type # Passed from the variable block
   tags = {
     Name = "example"
   }
