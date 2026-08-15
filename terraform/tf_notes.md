@@ -48,6 +48,9 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
     ```
  - Variables are usually declared in `variables.tf` file, but assigned values in a `.tfvars` file which could be more than one. For example, you can have `prod.tfvars` and `dev.tfvars` which assign different variable values, based on the environment, to the same variable declared in the `variables.tf` file.
  - There is also `output` as a block name. They are used in writing out resource attributes. For example, an EC2 instance's public IP address can be read out, even as input for another variable value.
+ - Terraform state, tracked by the `terraform.tfstate` file, is the kept and consistently updated records of resources managed by Teraraform. When `terraform apply` is executed, terraform compares the record in its state with the actual record, that is available service in the actual environment. It will then plan for creating or modifying the services as defined in the terraform file, if it does not exist in the actual environment.
+ - Idempotency - due to the state tracking, it does not matter the number of times the `terraform apply` is run, it will only apply once as the state would indicate that the service is already in place.
+ - Drift - when a service is already in the computing environment, but not tracked by Terraform state, it is recommended such service is imported into the terraform state for immediate and subsequent management to avoid duplication because would re-create them since the state has no knowledge such service already exist.
 
 ### Commands and their uses
 
