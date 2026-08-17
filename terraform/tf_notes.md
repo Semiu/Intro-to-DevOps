@@ -51,6 +51,7 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
  - Terraform state, tracked by the `terraform.tfstate` file, is the kept and consistently updated records of resources managed by Teraraform. When `terraform apply` is executed, terraform compares the record in its state with the actual record, that is available service in the actual environment. It will then plan for creating or modifying the services as defined in the terraform file, if it does not exist in the actual environment.
  - Idempotency - due to the state tracking, it does not matter the number of times the `terraform apply` is run, it will only apply once as the state would indicate that the service is already in place.
  - Drift - when a service is already in the computing environment, but not tracked by Terraform state, it is recommended such service is imported into the terraform state for immediate and subsequent management to avoid duplication because would re-create them since the state has no knowledge such service already exist.
+ - There are terraform state commands that can be used to manipulate the state without a complete destuction of the existing resource, especially if it is just trivial activiites like file naming, resource migration, etc.
 
 ### Commands and their uses
 
@@ -66,6 +67,6 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
 
 `terraform validate` - check syntax and configuration
 
-`terraform destroy` - to destory all declared resources.
+`terraform destroy` - to destroy all declared resources.
 
 `terraform console` - used to read terraform configuration through the CLI.
