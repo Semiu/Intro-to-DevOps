@@ -5,7 +5,7 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
 ### Notes
  - Data sources can be defined and reused in another resource by using the dot`[.]` operation as access pointer. For example, `data.ami_virtual.ubuntu.id` is pointing to a data map defined, named `data` and with `ami_virtual` and `ubuntu` as identifiers.
  - ![Terraform registry](https://registry.terraform.io/) is a resource for samples of this data sources. There is also ![Terrafrom HashiCorp developer note](https://developer.hashicorp.com/terraform/intro) for documentation and learning resources on Terraform.
- - The provider section of the Terraform's registry, among others, extensively describe the resource templates and the attribute reference
+ - The provider section of the Terraform's registry, among others, extensively describe the resource templates and the attribute reference. There are resource names, resource types, etc, such as `public_ip` and `public_subnets` that must be written as defined in the Terraform documentation.
  - Error of `Your query returned no results` when `aws_ami` is used is often caused by (1) no available resource in the definition within the specified region, (2) name filter match with the current naming convention.
  - Terraform does not pass variables between the different files of the same module, like we do `import` in `Python`, for example. It loads them together regardless of their filenames
     - What I have in the `first-steps/instance.tf` can become:
@@ -61,7 +61,7 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
 
 `terraform apply` - Apply (Plans and provisions) the resources based on the declaration. Needs to be confirmed by a `yes` input in the prompt. When no change made to the declared resource after it is already ran, it does nothing.
 
-`terraform apply -var instance_type=t4g.micro` for example, can be used to add variable value to the environment. Another way of using the `apply` command.
+`terraform apply -var instance_type=[INSTANCE_NAME]` for example, can be used to add variable value to the environment. Another way of using the `apply` command. An exampleof this is `t4.micro`
 
 `terraform fmt -recursive` - to format the `.tf` files.
 
@@ -70,3 +70,9 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
 `terraform destroy` - to destroy all declared resources.
 
 `terraform console` - used to read terraform configuration through the CLI.
+
+`terraform apply -target [target-module]` - used to target a particular module for terraform apply. The `[target-module]` can be `module.vpc`, for example.
+
+`terraform taint [resource-name]` - is used when a partiular resource is needed to be re-created. An example in the `terraform/first-steps` directory is `aws_instance.web`. The apply command would then be applied.
+
+`terraform output` - used to log into the output variable values to the console.

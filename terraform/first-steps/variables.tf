@@ -1,11 +1,11 @@
 variable "instance_type" {
-    type = string
+  type = string
 }
 
 variable "aws_region" {
-  type    = map
+  type = map(any)
 }
 
 variable "document_s3" {
-    type = string
+  type = string
 }
