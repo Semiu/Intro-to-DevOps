@@ -7,6 +7,9 @@ resource "aws_instance" "web" {
   ami           = data.aws_ami.ubuntu.id       # "ami-0d729a60" is a type of instance that can be passed from another resource especially data source
   instance_type = var.instance_type            # Passed from the variable block
   subnet_id     = module.vpc.public_subnets[0] # Passed from the output file - a list of three subnests shows in the output. Just indexing one
+
+  vpc_security_group_ids = [aws_security_group.allow_ssh.id] //something like sg-123456
+  key_name               = aws_key_pair.webkey.key_name
   tags = {
     Name = "example"
   }
@@ -38,4 +41,9 @@ resource "aws_security_group" "allow_ssh" {
   tags = {
     Name = "allow_ssh"
   }
+}
+
+resource "aws_key_pair" "webkey" {
+  key_name   = "web-ssh-key"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOlLFdIHvQfvRG8arHiZvOhsuiXGKKyDQoal1ghf0MP5 semiuakanmu@Mac.home.local"
 }

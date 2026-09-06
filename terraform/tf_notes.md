@@ -52,6 +52,7 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
  - Idempotency - due to the state tracking, it does not matter the number of times the `terraform apply` is run, it will only apply once as the state would indicate that the service is already in place.
  - Drift - when a service is already in the computing environment, but not tracked by Terraform state, it is recommended such service is imported into the terraform state for immediate and subsequent management to avoid duplication because would re-create them since the state has no knowledge such service already exist.
  - There are terraform state commands that can be used to manipulate the state without a complete destuction of the existing resource, especially if it is just trivial activiites like file naming, resource migration, etc.
+ - Almost every thing you build, especially as resource, has its TF-recognizable resource type name which must conform. This also applies to field name within the resource
 
 ### Commands and their uses
 
@@ -76,3 +77,5 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
 `terraform taint [resource-name]` - is used when a partiular resource is needed to be re-created. An example in the `terraform/first-steps` directory is `aws_instance.web`. The apply command would then be applied.
 
 `terraform output` - used to log into the output variable values to the console.
+
+`ssh -i webkey -l ubuntu-minimal 50.16.148.50`
