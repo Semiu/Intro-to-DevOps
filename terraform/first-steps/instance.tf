@@ -21,8 +21,8 @@ resource "aws_security_group" "allow_ssh" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    from_port        = 0
-    to_port          = 0
+    from_port        = 22
+    to_port          = 22
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
@@ -45,5 +45,5 @@ resource "aws_security_group" "allow_ssh" {
 
 resource "aws_key_pair" "webkey" {
   key_name   = "web-ssh-key"
-  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOlLFdIHvQfvRG8arHiZvOhsuiXGKKyDQoal1ghf0MP5 semiuakanmu@Mac.home.local"
+  public_key = file("webkey.pub") # Read the .gitignored file
 }
