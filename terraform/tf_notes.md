@@ -78,4 +78,4 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
 
 `terraform output` - used to log into the output variable values to the console.
 
-`ssh -i webkey -l ubuntu-minimal 50.16.148.50`
+`ssh -i webkey -l ubuntu-minimal 54.167.108.53`
