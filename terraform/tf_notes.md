@@ -2,12 +2,28 @@
 Terraform is for provisioning infrastructure, while tools like Ansible, Chef, Puppet are for installation and configuration of the software.
 Terraform works well with software automation tool like Ansible, anyway. Jenkins is used in automating building, testing and deploying software. 
 
-### Notes
+###  General Notes
  - Data sources can be defined and reused in another resource by using the dot`[.]` operation as access pointer. For example, `data.ami_virtual.ubuntu.id` is pointing to a data map defined, named `data` and with `ami_virtual` and `ubuntu` as identifiers.
  - ![Terraform registry](https://registry.terraform.io/) is a resource for samples of this data sources. There is also ![Terrafrom HashiCorp developer note](https://developer.hashicorp.com/terraform/intro) for documentation and learning resources on Terraform.
  - The provider section of the Terraform's registry, among others, extensively describe the resource templates and the attribute reference. There are resource names, resource types, etc, such as `public_ip` and `public_subnets` that must be written as defined in the Terraform documentation.
  - Error of `Your query returned no results` when `aws_ami` is used is often caused by (1) no available resource in the definition within the specified region, (2) name filter match with the current naming convention.
- - Terraform does not pass variables between the different files of the same module, like we do `import` in `Python`, for example. It loads them together regardless of their filenames
+ - Terraform state, tracked by the `terraform.tfstate` file, is the kept and consistently updated records of resources managed by Teraraform. When `terraform apply` is executed, terraform compares the record in its state with the actual record, that is available service in the actual environment. It will then plan for creating or modifying the services as defined in the terraform file, if it does not exist in the actual environment.
+ - Idempotency - due to the state tracking, it does not matter the number of times the `terraform apply` is run, it will only apply once as the state would indicate that the service is already in place.
+ - Drift - when a service is already in the computing environment, but not tracked by Terraform state, it is recommended such service is imported into the terraform state for immediate and subsequent management to avoid duplication because would re-create them since the state has no knowledge such service already exist.
+ - There are terraform state commands that can be used to manipulate the state without a complete destuction of the existing resource, especially if it is just trivial activiites like file naming, resource migration, etc.
+ - Almost every thing you build, especially as resource, has its TF-recognizable resource type name which must conform. This also applies to field name within the resource
+
+ ### Basics of HashiCorp Configuration Language (HCL)
+ - Code is generally organized into blocks and these are like kind of containers that group related configuration together.
+    ```terraform
+        block_type "block_label" "block_label"{
+            first_argument = expression or value
+            second_argument = expression or value
+        }
+    ```
+- Comments can be added when as a single line with # comment or /** block comment **/
+- Data blocks are used for retrieving information about existing resource
+- Terraform does not pass variables between the different files of the same module, like we do `import` in `Python`, for example. It loads them together regardless of their filenames
     - What I have in the `first-steps/instance.tf` can become:
      - `variables.tf`
     ```terraform
@@ -48,11 +64,6 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
     ```
  - Variables are usually declared in `variables.tf` file, but assigned values in a `.tfvars` file which could be more than one. For example, you can have `prod.tfvars` and `dev.tfvars` which assign different variable values, based on the environment, to the same variable declared in the `variables.tf` file.
  - There is also `output` as a block name. They are used in writing out resource attributes. For example, an EC2 instance's public IP address can be read out, even as input for another variable value.
- - Terraform state, tracked by the `terraform.tfstate` file, is the kept and consistently updated records of resources managed by Teraraform. When `terraform apply` is executed, terraform compares the record in its state with the actual record, that is available service in the actual environment. It will then plan for creating or modifying the services as defined in the terraform file, if it does not exist in the actual environment.
- - Idempotency - due to the state tracking, it does not matter the number of times the `terraform apply` is run, it will only apply once as the state would indicate that the service is already in place.
- - Drift - when a service is already in the computing environment, but not tracked by Terraform state, it is recommended such service is imported into the terraform state for immediate and subsequent management to avoid duplication because would re-create them since the state has no knowledge such service already exist.
- - There are terraform state commands that can be used to manipulate the state without a complete destuction of the existing resource, especially if it is just trivial activiites like file naming, resource migration, etc.
- - Almost every thing you build, especially as resource, has its TF-recognizable resource type name which must conform. This also applies to field name within the resource
 
 ### Commands and their uses
 
@@ -78,4 +89,4 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
 
 `terraform output` - used to log into the output variable values to the console.
 
-`ssh -i webkey -l ubuntu-minimal 54.167.108.53`
+`ssh -i webkey ubuntu@54.167.108.53` where ubuntu is the EC2 (Elastic Compute Cloud) AMI, and 54.167.108.53 is the public ip
