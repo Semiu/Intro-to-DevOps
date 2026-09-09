@@ -22,7 +22,7 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
         }
     ```
 - Comments can be added when as a single line with # comment or /** block comment **/
-- Data blocks are used for retrieving information about existing resource
+- Data blocks are used for retrieving information about existing resources
 - Terraform does not pass variables between the different files of the same module, like we do `import` in `Python`, for example. It loads them together regardless of their filenames
     - What I have in the `first-steps/instance.tf` can become:
      - `variables.tf`
@@ -64,6 +64,12 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
     ```
  - Variables are usually declared in `variables.tf` file, but assigned values in a `.tfvars` file which could be more than one. For example, you can have `prod.tfvars` and `dev.tfvars` which assign different variable values, based on the environment, to the same variable declared in the `variables.tf` file.
  - There is also `output` as a block name. They are used in writing out resource attributes. For example, an EC2 instance's public IP address can be read out, even as input for another variable value.
+ - Embrace appropriate use of file extensions, formatting, organization, commenting and documentations, and avoid using hard-coded values.
+
+### Resource Referencing
+- HCL supports dynamic configurations whereby Terraform uses the properties from one resource as an input in another, avoiding hardcoding.
+- Terraform also automatically maps dependencies by determining the order of resource creation based on references.
+- Terraform uses resource identifiers where resource is given a unique name that allows it a unique address in the state file. This address can then be referenced by other resource.
 
 ### Commands and their uses
 
