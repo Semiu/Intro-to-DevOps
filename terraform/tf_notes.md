@@ -71,6 +71,17 @@ Terraform works well with software automation tool like Ansible, anyway. Jenkins
 - Terraform also automatically maps dependencies by determining the order of resource creation based on references.
 - Terraform uses resource identifiers where resource is given a unique name that allows it a unique address in the state file. This address can then be referenced by other resource.
 
+### Terraform Core Components
+- Core - this is the CLI tool that provisions and manages the infrastructure resources defined in the TF configuration files.
+- Providers - these are the public cloud providers, SaaS offerings, etc., which serve as bridge in bringing into built what the configuration files define.
+  Providers give Terraform the neccesary instructions to communicate with the platforms.
+- Resources - these are the infrastructure components that are managed by Terraform. These can vary from virtual machines, to databases, to repository, etc.
+  The resources have their standard referenced names and attributes in declaring their configuration set up.
+- State - this is what helps Terraform maps the desired configuration with the real world resources on the target platform. Can be described as Terraform memory.
+
+### Terraform Workflow
+
+
 ### Commands and their uses
 
 `terraform init` - to initialize the terraform backend server. It produces `.terraform` (advisable to be .gitignored) which contains downloaded provider plugins. module caches and other local working files. Not a source code and should not be committed. It is also produces `terraform.lock.hcl` which should be committed because it ensures everyone working on the project CI/CD uses the same provider version.
