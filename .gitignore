@@ -205,6 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+# Terraform directories
 terraform/first-steps/.terraform/
 terraform/first-steps/webkey
 terraform/first-steps/webkey.pub
+
+terraform/cert-prep/.terraform/

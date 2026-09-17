@@ -8,6 +8,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
  - The provider section of the Terraform's registry, among others, extensively describe the resource templates and the attribute reference. There are resource names, resource types, etc, such as `public_ip` and `public_subnets` that must be written as defined in the Terraform documentation.
  - Error of `Your query returned no results` when `aws_ami` , or any resource name, is used is often caused by (1) no available resource in the definition within the specified region, (2) name filter match with the current naming convention.
  - Terraform state, tracked by the `terraform.tfstate` file, is the kept and consistently updated records of resources managed by Terraform. When `terraform apply` is executed, terraform compares the record in its state with the actual record, that is available service in the actual environment. 
+ - Another important and related file is the `terraform.tfstate.backup` which backs up the previous state file before Terraform writes anything new to the state file. It is used for recovery in case of accidental modification.
    It will then plan for creating or modifying the services as defined in the terraform file, if it does not exist in the actual environment.
  - Idempotency - due to the state tracking, it does not matter the number of times the `terraform apply` is run, it will only apply once as the state would indicate that the service is already in place.
  - Drift - when a service is already in the computing environment, but not tracked by Terraform state, it is recommended such service is imported into the terraform state for immediate and subsequent management to avoid duplication because TF would re-create resources that the state has no knowledge of.
@@ -123,7 +124,7 @@ TF apply can be done in varieties of ways: (i) The `terraform apply` way where y
 
 `terraform output` - used to log into the output variable values to the console.
 
-`terraform fmt -recursive` - to format the `.tf` files.
+`terraform fmt -recursive` - to format ALL the `.tf` files in all the directories, while `terraform fmt` just formats the `.tf` files in the working directory.
 
 `terraform validate` - checks syntax and configuration correctness. It helps in ensuring the structure is valid. `validate` is only about syntax and structure and does not guarrantee that the configuration
 will be succesfully deployed. The command does not communicate with the providers; it's 100% local. Therefore, it's logical to understand that `validate` does not catch every error such as those that will need 
@@ -138,7 +139,7 @@ to create it in its next `terraform apply`. Resources not managed bt TF are not 
 
 `terraform console` - used to read terraform configuration through the CLI.
 
-`terraform state` - to manage items in the state file.
+`terraform state` - to manage items in the state file. `terraform state list` lists the resources being managed by the state file at the time.
 
 `terraform show` - to display information about your managed infrastructure.
 
@@ -150,3 +151,7 @@ to create it in its next `terraform apply`. Resources not managed bt TF are not 
 - Environment variables provide a way of passing configuration settings and credentials into TF without hardcoding them.
 - They secure sensitive data API and allows TF to pick them up automatically, especially when interacting with API keys, authentication tokens, etc.
 - Commonly used env variables are `TF_LOG` (setting the level of comnsole logging for debugging and monitoring); `TF_VAR_svr_name` as an example of variable name to be passed through the environment, requiring it is prefixed by `TF_VAR`; `AWS_ACCESS_KEY_ID` as an example of any cloud provider security credentials.
+
+### Using the CLI for help
+- Terraform's CLI provides some learning resources. First, the autocomplete helps in completing a command by pressing the tab key after typing `terraform`. However, the autocomplete installation must be first done through `terraform -install-autocomplete`.
+- `terraform --help` is also very handy as it lists all TF commands with accompnaying short descriptions. For specific command, `terraform <command> --help` gives a breakdown what the command does. For example, `terraform apply --help` gives  a breakdown of what the `apply` command does.
