@@ -10,6 +10,10 @@ resource "aws_instance" "web" {
 
   vpc_security_group_ids = [aws_security_group.allow_ssh.id] //something like sg-123456
   key_name               = aws_key_pair.webkey.key_name
+
+  user_data = templatefile("${path.module}/templates/web.tpl", {
+    "region" = var.aws_region["east"]
+  })
   tags = {
     Name = "example"
   }

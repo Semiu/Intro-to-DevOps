@@ -4,7 +4,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
 
 ###  General Notes
  - Data sources can be defined and reused in another resource by using the dot`[.]` operation as access pointer. For example, `data.ami_virtual.ubuntu.id` is pointing to a data map defined, named `data` and with `ami_virtual` and `ubuntu` as identifiers.
- - ![Terraform registry](https://registry.terraform.io/) is a resource for samples of this data sources. There is also ![Terrafrom HashiCorp developer note](https://developer.hashicorp.com/terraform/intro) for documentation and learning resources on Terraform.
+ - ![Terraform registry](https://registry.terraform.io/) is a resource for samples of this data sources. There is also ![Terrafrom HashiCorp developer note](https://developer.hashicorp.com/terraform/intro) for documentation and learning resources on Terraform. The TF built-in functions like `file`, `join`, etc. are enumerated in this documentation.
  - The provider section of the Terraform's registry, among others, extensively describe the resource templates and the attribute reference. There are resource names, resource types, etc, such as `public_ip` and `public_subnets` that must be written as defined in the Terraform documentation.
  - Error of `Your query returned no results` when `aws_ami` , or any resource name, is used is often caused by (1) no available resource in the definition within the specified region, (2) name filter match with the current naming convention.
  - Terraform state, tracked by the `terraform.tfstate` file, is the kept and consistently updated records of resources managed by Terraform. When `terraform apply` is executed, terraform compares the record in its state with the actual record, that is available service in the actual environment. 
@@ -137,7 +137,7 @@ remove the individual resources no longer wanted from the configuration `.tf` fi
 `terraform destroy -target=<resource_name>` can be used to destroy name using its address name. But if such resource is not removed from configuration file, TF will attempt
 to create it in its next `terraform apply`. Resources not managed bt TF are not going to be affected by the `destroy` command.
 
-`terraform console` - used to read terraform configuration through the CLI.
+`terraform console` - used to demonstrate TF commands, functions, for example, reading terraform configuration, all through the CLI.
 
 `terraform state` - to manage items in the state file. `terraform state list` lists the resources being managed by the state file at the time.
 
@@ -155,3 +155,9 @@ to create it in its next `terraform apply`. Resources not managed bt TF are not 
 ### Using the CLI for help
 - Terraform's CLI provides some learning resources. First, the autocomplete helps in completing a command by pressing the tab key after typing `terraform`. However, the autocomplete installation must be first done through `terraform -install-autocomplete`.
 - `terraform --help` is also very handy as it lists all TF commands with accompnaying short descriptions. For specific command, `terraform <command> --help` gives a breakdown what the command does. For example, `terraform apply --help` gives  a breakdown of what the `apply` command does.
+
+### Provisioning
+Installing software on provisioned EC2 instance, for example: there are tools, capable of SSHing to the instance, like Ansible to handle this.
+TF makes a way to also do this through `user_data` functionality. It will help in making software available on your instance while creating it. When making new updates to the instance, the instance is re-created. More importantly, with `user_data`, TF doesn't need SSH access to have it executed.
+
+The `user_data` can be used to pass templates - mimicking Dockerfile-type of installation instruction statements, to install software into the SSH. This then can be observed when SSHed to the EC2, go sudo, and check the `var/log/cloud-init-output.log`.
