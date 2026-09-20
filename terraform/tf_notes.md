@@ -120,7 +120,7 @@ TF apply can be done in varieties of ways: (i) The `terraform apply` way where y
 `terraform apply -parallelism=5` - used in modifying the default number (i.e. 10) of the parrallel operations that TF can apply. Parallelism flag can be applied to `plan`, `apply` and `destroy`. Use cases for applying the parallelism flag to reduce the number of operations to be parallelized are (a) managing providers' API rate limit, or 
 (b) slowing down the operations during debugging and troubleshooting for visual walkthrough.
 
-`terraform taint [resource-name]` - is used when a partiular resource is needed to be re-created. An example in the `terraform/first-steps` directory is `aws_instance.web`. The apply command would then be applied.
+`terraform taint [resource-name]` - is used when a partiular resource is needed to be re-created. An example in the `terraform/first-steps` directory is `aws_instance.web`. The `terraform apply` command would then be applied to complete the re-creation.
 
 `terraform output` - used to log into the output variable values to the console.
 
@@ -161,3 +161,6 @@ Installing software on provisioned EC2 instance, for example: there are tools, c
 TF makes a way to also do this through `user_data` functionality. It will help in making software available on your instance while creating it. When making new updates to the instance, the instance is re-created. More importantly, with `user_data`, TF doesn't need SSH access to have it executed.
 
 The `user_data` can be used to pass templates - mimicking Dockerfile-type of installation instruction statements, to install software into the SSH. This then can be observed when SSHed to the EC2, go sudo, and check the `var/log/cloud-init-output.log`.
+Additional data can be synced from storage such as AWs S3 bucket into the EC2 instance - achieveable by passing s3 bucker attributes into the `user_data` bloc in the EC2, and ensure that a S3 sync command is added into the template (like `web.tpl`) that would be installed.
+
+The `user_data` is the recommended approach from the TF documentation. However, there is also `provisioner` (of a last resort)

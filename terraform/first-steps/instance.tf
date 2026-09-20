@@ -11,9 +11,26 @@ resource "aws_instance" "web" {
   vpc_security_group_ids = [aws_security_group.allow_ssh.id] //something like sg-123456
   key_name               = aws_key_pair.webkey.key_name
 
-  user_data = templatefile("${path.module}/templates/web.tpl", {
-    "region" = var.aws_region["east"]
-  })
+  //start - `user_data`
+  //user_data = templatefile("${path.module}/templates/web.tpl", {
+  //"region" = var.aws_region["east"]
+  //})
+  //end- `user_data
+
+  // for provisoner - when `user_data is not used
+  user_data_replace_on_change = true
+
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file("webkey") # Read the .gitignored file
+    host        = self.public_ip
+  }
+  provisioner "remote-exec" {
+    inline = ["sudo apt-get update", "sudo apt-get -y install nginx"]
+
+  }
+  // end - provisioner
   tags = {
     Name = "example"
   }
