@@ -15,9 +15,9 @@ resource "aws_instance" "web" {
   //user_data = templatefile("${path.module}/templates/web.tpl", {
   //"region" = var.aws_region["east"]
   //})
-  //end- `user_data
+  //end- `user_data`
 
-  // for provisoner - when `user_data is not used
+  // for provisioner - when `user_data` is not used
   user_data_replace_on_change = true
 
   connection {

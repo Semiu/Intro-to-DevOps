@@ -163,4 +163,26 @@ TF makes a way to also do this through `user_data` functionality. It will help i
 The `user_data` can be used to pass templates - mimicking Dockerfile-type of installation instruction statements, to install software into the SSH. This then can be observed when SSHed to the EC2, go sudo, and check the `var/log/cloud-init-output.log`.
 Additional data can be synced from storage such as AWs S3 bucket into the EC2 instance - achieveable by passing s3 bucker attributes into the `user_data` bloc in the EC2, and ensure that a S3 sync command is added into the template (like `web.tpl`) that would be installed.
 
-The `user_data` is the recommended approach from the TF documentation. However, there is also `provisioner` (of a last resort)
+The `user_data` is the recommended approach from the TF documentation. However, there is also `provisioner` (of a last resort).
+
+There is AWS Cloud Control API for providers without standards AWS APIs
+
+### Terraform remote state
+- Terraform remote state is to allow multiple teams working on the same infrastructure to have access to the state file. This can be AWS S3, Azure Blob storage, etc.
+- For remote backends, state locking procedure is important to prevent multiple applications on the same states at the same time. AWS Dynamo db can be used in this situation for managing state lock is the AWS S3 is used to keep the state file remotely.
+  - A record is written in the dynamodb table when a `terraform apply` is applied. 
+  - When someone also makes the `terraform apply`, TF firstly checks the dynamodb table and only applies when there is no existing lock.
+- When the `terraform.tfstate` file is deleted, Terraform does not know the remote state anymore, so it has to be manually re-created.
+
+### Data sources
+- These are used in reading resources' output variable values
+- The three common used data sources are (i) `aws_caller_identity` - to get access to the effective Account ID, User ID and ARN that TF is authorized for, (ii) vpc id, and 
+- `locals` is a keyword in passing variables values in TF. 
+```terraform
+  locals {
+    vcp = module.vpc_id.actual_id
+  }
+
+```
+Then, `vcp_id = local.vcp` will point to the vcp in the locals.
+- Comparing data sources with variables: variables are static and datasources are dynamic
