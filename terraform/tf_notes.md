@@ -70,6 +70,30 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
  - Variables are usually declared in `variables.tf` file, but assigned values in a `.tfvars` file which could be more than one. For example, you can have `prod.tfvars` and `dev.tfvars` which assign different variable values, based on the environment, to the same variable declared in the `variables.tf` file.
  - There is also `output` as a block name. They are used in writing out resource attributes. For example, an EC2 instance's public IP address can be read out, even as input for another variable value.
  - Embrace appropriate use of file extensions, formatting, organization, commenting and documentations, and avoid using hard-coded values.
+ - Terraform block types are:
+  (i) Provider - to connect TF to cloud platforms, 
+    - When using multiple providers in the same configuration files, we need to provide the `alias` attribute for each of these providers. Therefore, the provider alias is now referenced in each of the resource block.
+    ```terraform
+      provider "aws"{
+        alias = "dev"
+        region = "us-east-1"
+      }
+      provider aws{
+        alias = "prod"
+        region = "us-west-1"
+      }
+
+      resource "aws_s3_bucket" "dev_bucket"{
+        provider = aws.dev
+        bucket = "my-dev-bucket
+      }
+    ```
+    - When alias is not provided in a provider bloc, and resource not referencing an alias is assumed to be for the provider without alias.
+
+  (ii) resource - the infra created, updated and deleted, (iii) data - to retrieve information about existing resources, 
+ (iv) variable - reusable code with defined values that can be customized, (v) output - displays or shares essential information about resources after deployment, (vi) terraform - settings like version about TF,
+ (vii) module - reusable configurations that group related resources together so that they can share configuration, (viii) import - pulling in existing resources into TF management
+
 
 ### Resource Referencing
 - HCL supports dynamic configurations whereby Terraform uses the properties from one resource as an input in another, avoiding hardcoding.
@@ -185,4 +209,4 @@ There is AWS Cloud Control API for providers without standards AWS APIs
 
 ```
 Then, `vcp_id = local.vcp` will point to the vcp in the locals.
-- Comparing data sources with variables: variables are static and datasources are dynamic
+- Comparing data sources with variables: variables are static and datasources are dynamic.
