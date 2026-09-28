@@ -210,4 +210,5 @@ terraform/first-steps/.terraform/
 terraform/first-steps/webkey
 terraform/first-steps/webkey.pub
 
-terraform/cert-prep/.terraform/
+terraform/cert-prep/demo-01/.terraform/
+terraform/cert-prep/demo-02/.terraform/
