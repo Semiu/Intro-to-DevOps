@@ -1,4 +1,3 @@
-/**
 provider "github" {
   token = var.github_token
 
@@ -17,4 +16,3 @@ resource "github_repository" "test-repo" {
   visibility    = "private"
 
 }
-*/

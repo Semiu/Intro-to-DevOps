@@ -60,6 +60,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
     ```
  - Block definition could has three types (i) block type, (ii) resource type and, (3) reference name. In the example of `instance.tf` above, block type is 
  `resource`, resource type is `aws_instance`, and reference name is `bar`.
+ The resource block is core, helps in defining specific infra to be created. In defining the resource block, we will name the type and specify the configurations, then the unique identifier for the resource.
 
  - For variables, their block type must be named `variable` as 
     ```terraform
@@ -97,7 +98,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
 
 ### Resource Referencing
 - HCL supports dynamic configurations whereby Terraform uses the properties from one resource as an input in another, avoiding hardcoding.
-- Terraform also automatically maps dependencies by determining the order of resource creation based on references.
+- Terraform also automatically maps dependencies by determining the order of resource creation based on references. This is called implicit dependency.
 - Terraform uses resource identifiers where resource is given a unique name that allows it a unique address in the state file. This address can then be referenced by other resource.
 
 ### Resource Graph
@@ -121,7 +122,7 @@ This can be modified through the `-parallelism` flag.
 Terraform CLI generally provides unified workflow that ensures consistency and repeatability.
 
 `terraform init` - to initialize the terraform backend server based on the defined utility provider. It's the first command to run in a new Terraform project. It produces `.terraform` directory (advisable to be .gitignored, not a source code and should not be committed) which contains the `providers` and `modules` sub-directories. 
-The `.terraform/providers` stores cached versions of the configuration's providers - a kinda tooolbox needed by TF to get its work done. The `.terraform/modules` contains downloaded versions of modules referenced in the configurarion files. 
+The `.terraform/providers` stores cached versions of the configuration's providers - a kinda toolbox needed by TF to get its work done. The `.terraform/modules` contains downloaded versions of modules referenced in the configurarion files. 
 The command is also going to be required anytime the backend settings changed (provider version, provider change), the module is updated with a new one, etc. `init` also produces `.terraform.lock.hcl` in the working directly. This file is expected to be committed, because it ensures everyone working on the project CI/CD uses the same provider version. 
 The `.terraform.lock.hcl` file locks dependency versions for consistency across your working environment. `terraform init -upgrade` can be run to upgrade existing providers and modules' versions.
 
