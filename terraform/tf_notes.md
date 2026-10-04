@@ -91,8 +91,48 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
     ```
     - When alias is not provided in a provider bloc, and resource not referencing an alias is assumed to be for the provider without alias.
 
-  (ii) resource - the infra created, updated and deleted, (iii) data - to retrieve information about existing resources, 
- (iv) variable - reusable code with defined values that can be customized, (v) output - displays or shares essential information about resources after deployment, (vi) terraform - settings like version about TF,
+  (ii) resource - the infra created, updated and deleted, 
+  (iii) data - to retrieve information about existing resources. This does not create a new resource; best used for existing infra not to be created or managed by TF bfut needs its data for TF's usage
+  The data block helps in querying to retrieve such information, 
+    ```terraform 
+      data "aws_vpc" "prod"{
+        filter {
+          name = "tag:name"
+          values = ["prd-vpc"]
+        }
+      }
+    ```
+    This can then be referenced in what is called attribute referencing -
+    ```terraform 
+      resource "aws_subnet" "public"{
+        vpc_id = data.aws_vpc.prod.id
+        cir_block = "10.0.6.0/24"
+      }
+    ```
+
+ (iv) variable - reusable code with defined values that can be customized. Helps in parameterizing configurations with different variables required in dyanmic setups environments.
+ This, therefore, helps in code reusability.
+    ```terraform 
+      variable "vm_datacenter_east" {
+        description = "name of the datacenter"
+        type = string
+        default = "prd-workload"
+      }
+    ```
+  All information in a defined variable bloc is optional, including the type of the variable.
+  The primitive variable types are string, number, bool. The good thing about specifying the data type is, it enforces the type of the value that can be passed to the variable.
+  Complex variable types are List (ordered list that can be accessed through index), Set (unique unordered list that cannot be accessed through index), Map (key-value pair).
+  Variable can be accessed through `var.<variable_name>` structure in single value variable. 
+  There are different ways of seeting values for variables - (a) setting from the default value attribute when the variable is declared, (b) using the environment variable (TF_VAR used in session), 
+  (c) `.tfvars` file which serves like a config file, but dedicated to set variable values, and (d) command line using the `-var="key=value` to set up a specific variable value. 
+  The CLI variable set overrides the default values and those in `.tfvars` files. 
+  The order of precedence - how terraform resolves variable values from different sources: i. command line flags -> ii. *.auto.tfvars files -> iii. *.tfvars -> iv. environment variables -> v. variable block defaults
+  
+ (v) output - displays or shares essential information about resources after deployment; enables module integration by allowing data passing from one module to the others;
+ improves workflow efficiency. Outputs are stored in the Terraform state file and can be accessed without rerunning the configuration, but rather by using the `terraform output` command.
+
+ (vi) terraform - settings like version about TF, the backend setting, S3/dynamo db to be used for remote state file management, etc. in essence, it sets up global configuration of the TF to be used in a project
+
  (vii) module - reusable configurations that group related resources together so that they can share configuration, (viii) import - pulling in existing resources into TF management
 
 
