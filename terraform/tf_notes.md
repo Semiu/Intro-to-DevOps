@@ -71,6 +71,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
  - Variables are usually declared in `variables.tf` file, but assigned values in a `.tfvars` file which could be more than one. For example, you can have `prod.tfvars` and `dev.tfvars` which assign different variable values, based on the environment, to the same variable declared in the `variables.tf` file.
  - There is also `output` as a block name. They are used in writing out resource attributes. For example, an EC2 instance's public IP address can be read out, even as input for another variable value.
  - Embrace appropriate use of file extensions, formatting, organization, commenting and documentations, and avoid using hard-coded values.
+ - TF supports equality `==`, `!=`, `>`, `>`, `<=`, `>=`, `&&`, `||`, and unary `!`
  - Terraform block types are:
   (i) Provider - to connect TF to cloud platforms, 
     - When using multiple providers in the same configuration files, we need to provide the `alias` attribute for each of these providers. Therefore, the provider alias is now referenced in each of the resource block.
@@ -249,5 +250,5 @@ There is AWS Cloud Control API for providers without standards AWS APIs
   }
 
 ```
-Then, `vcp_id = local.vcp` will point to the vcp in the locals.
+Then, `vcp_id = local.vcp` will point to the vcp in the locals. For `module.vpc_id.actual_id` to work, there MUST be `module.vpc_id.output` where `actual_id` is one of the variables declared as outputs for the `vpc_id` module.
 - Comparing data sources with variables: variables are static and datasources are dynamic.
