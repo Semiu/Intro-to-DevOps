@@ -72,6 +72,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
  - There is also `output` as a block name. They are used in writing out resource attributes. For example, an EC2 instance's public IP address can be read out, even as input for another variable value.
  - Embrace appropriate use of file extensions, formatting, organization, commenting and documentations, and avoid using hard-coded values.
  - TF supports equality `==`, `!=`, `>`, `>`, `<=`, `>=`, `&&`, `||`, and unary `!`
+ - The important difference between `for` and `for_each` loop is that, the former is used on list, map, or any data structure with iterable capability, but the latter is for nested block, allowing looping over data and output multiple literal blocks
  - Terraform block types are:
   (i) Provider - to connect TF to cloud platforms, 
     - When using multiple providers in the same configuration files, we need to provide the `alias` attribute for each of these providers. Therefore, the provider alias is now referenced in each of the resource block.
