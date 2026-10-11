@@ -12,7 +12,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
    It will then plan for creating or modifying the services as defined in the terraform file, if it does not exist in the actual environment.
  - Idempotency - due to the state tracking, it does not matter the number of times the `terraform apply` is run, it will only apply once as the state would indicate that the service is already in place.
  - Drift - when a service is already in the computing environment, but not tracked by Terraform state, it is recommended such service is imported into the terraform state for immediate and subsequent management to avoid duplication because TF would re-create resources that the state has no knowledge of.
- - There are terraform state commands that can be used to manipulate the state without a complete destuction of the existing resource, especially if it is just trivial activiites like file naming, resource migration, etc.
+ - There are terraform state commands that can be used to manipulate the state without a complete destuction of the existing resource, especially if it is just trivial activiites like file naming, resource migration, etc. These are further described in the `Commands and their uses` section.
  - Almost every thing you build, especially as resource, has its TF-recognizable resource type name which must conform. This also applies to field name within the resource.
  - The Terraform workflow starts with (i) write - creating and modifying the TF configuration files (this is done by you), (ii) plan - preview changes before applying them (TF does this based on what it sees in the configuration files),
    (iii) apply - TF now implements the configuration written and planned. Best practices for `terraform apply` include (a) before apply - always review plan; ensure in you're in the right directory; test in non-production, (b) during apply - read the plan carefully,
@@ -206,7 +206,13 @@ to create it in its next `terraform apply`. Resources not managed bt TF are not 
 
 `terraform console` - used to demonstrate TF commands, functions, for example, reading terraform configuration, all through the CLI.
 
-`terraform state` - to manage items in the state file. `terraform state list` lists the resources being managed by the state file at the time.
+`terraform state` - to manage/ manipulate items in the state file. `terraform state list` lists the resources being managed by the state file at the time. Other `terraform state` related commands are:
+  - `terraform state mv` - move an item in the state (or rename)
+  - `terraform state pull` - pull current state and outpfut to stdout
+  - `terraform state push` - overwrite state by pushing local file to statefile
+  - `terraform state replace-provider` - replace a provider (like AWS) in the state file
+  - `terraform state rm` - remove item from state
+  - `terraform state show` - show item in state
 
 `terraform show` - to display information about your managed infrastructure.
 
