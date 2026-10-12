@@ -135,7 +135,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
 
  (vi) terraform - settings like version about TF, the backend setting, S3/dynamo db to be used for remote state file management, etc. in essence, it sets up global configuration of the TF to be used in a project
 
- (vii) module - reusable configurations that group related resources together so that they can share configuration, (viii) import - pulling in existing resources into TF management
+ (vii) module - reusable configurations that group related resources together so that they can share configuration. `version` argument can be included in the `module` block that sources from a registry to pin down a specific modudle release and avoid unneccesary upgrades, (viii) import - pulling in existing resources into TF management
 
 
 ### Resource Referencing
@@ -171,6 +171,8 @@ The `.terraform.lock.hcl` file locks dependency versions for consistency across 
 `terraform plan` - Previews changes to be applied. It generates an execution plan that shows the changes TF will make to the real-world resources to match the desired state configuration. The plan shows the resources to be created, giving the opportunity to revise and avoid unintended changes. This is the first time that TF reaches out to the providers' platform through its APIs. 
 Though, it is not required since `terraform apply` can be applied directly but it is advisable so that planned changes are reviewed. To output the TF plan for external saving, use `terraform plan -out`.
 
+`terraform plan -refresh-only` - Will show how the state would be updated to match the current real-world values without making any changes
+
 `terraform plan -out` - helps in situations whereby plans need to be approved before being applied. The output is guaranted to be applied. Saving terraform plan is through `terraform plan -out=myplan_file.tfplan`. The `myplan_file` is a placeholder for any filename. You don't need the extension to be be `.tfplan` either, though it has become a kind of industry convention. 
 Applying the saved plan is through `terraform apply myplan_file.tfplan` command.
 
@@ -183,6 +185,8 @@ TF apply can be done in varieties of ways: (i) The `terraform apply` way where y
 `terraform apply -var instance_type=[INSTANCE_NAME]` for example, can be used to add variable value to the environment. Another way of using the `apply` command. An exampleof this is `t4.micro`
 
 `terraform apply -target [target-module]` - used to target a particular module for terraform apply. The `[target-module]` can be `module.vpc`, for example.
+
+`terraform apply -refresh-only` - updates the state file and can write changes
 
 `terraform apply -parallelism=5` - used in modifying the default number (i.e. 10) of the parrallel operations that TF can apply. Parallelism flag can be applied to `plan`, `apply` and `destroy`. Use cases for applying the parallelism flag to reduce the number of operations to be parallelized are (a) managing providers' API rate limit, or 
 (b) slowing down the operations during debugging and troubleshooting for visual walkthrough.
@@ -223,7 +227,7 @@ to create it in its next `terraform apply`. Resources not managed bt TF are not 
 ### Using Environment variables with the CLI
 - Environment variables provide a way of passing configuration settings and credentials into TF without hardcoding them.
 - They secure sensitive data API and allows TF to pick them up automatically, especially when interacting with API keys, authentication tokens, etc.
-- Commonly used env variables are `TF_LOG` (setting the level of comnsole logging for debugging and monitoring); `TF_VAR_svr_name` as an example of variable name to be passed through the environment, requiring it is prefixed by `TF_VAR`; `AWS_ACCESS_KEY_ID` as an example of any cloud provider security credentials.
+- Commonly used env variables are `TF_LOG` (setting the level of console logging for debugging and monitoring); `TF_VAR_svr_name` as an example of variable name to be passed through the environment, requiring it is prefixed by `TF_VAR_` where `svr_name` is just an example of the variable name identifier; `AWS_ACCESS_KEY_ID` as an example of any cloud provider security credentials.
 
 ### Using the CLI for help
 - Terraform's CLI provides some learning resources. First, the autocomplete helps in completing a command by pressing the tab key after typing `terraform`. However, the autocomplete installation must be first done through `terraform -install-autocomplete`.
@@ -259,3 +263,5 @@ There is AWS Cloud Control API for providers without standards AWS APIs
 ```
 Then, `vcp_id = local.vcp` will point to the vcp in the locals. For `module.vpc_id.actual_id` to work, there MUST be `module.vpc_id.output` where `actual_id` is one of the variables declared as outputs for the `vpc_id` module.
 - Comparing data sources with variables: variables are static and datasources are dynamic.
+
+### HCP Terraform
