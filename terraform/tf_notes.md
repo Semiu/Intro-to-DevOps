@@ -8,6 +8,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
  - The provider section of the Terraform's registry, among others, extensively describe the resource templates and the attribute reference. There are resource names, resource types, etc, such as `public_ip` and `public_subnets` that must be written as defined in the Terraform documentation.
  - Error of `Your query returned no results` when `aws_ami` , or any resource name, is used is often caused by (1) no available resource in the definition within the specified region, (2) name filter match with the current naming convention.
  - Terraform state, tracked by the `terraform.tfstate` file, is the kept and consistently updated records of resources managed by Terraform. When `terraform apply` is executed, terraform compares the record in its state with the actual record, that is available service in the actual environment. 
+ - If the `terraform.tfstate` file is accidentally deleted, Terraform can no longer track the resources and the next plan might recreate or dcuplicate resources
  - Another important and related file is the `terraform.tfstate.backup` which backs up the previous state file before Terraform writes anything new to the state file. It is used for recovery in case of accidental modification.
    It will then plan for creating or modifying the services as defined in the terraform file, if it does not exist in the actual environment.
  - Idempotency - due to the state tracking, it does not matter the number of times the `terraform apply` is run, it will only apply once as the state would indicate that the service is already in place.
@@ -17,6 +18,10 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
  - The Terraform workflow starts with (i) write - creating and modifying the TF configuration files (this is done by you), (ii) plan - preview changes before applying them (TF does this based on what it sees in the configuration files),
    (iii) apply - TF now implements the configuration written and planned. Best practices for `terraform apply` include (a) before apply - always review plan; ensure in you're in the right directory; test in non-production, (b) during apply - read the plan carefully,
    watch for unexpected changes; be patient with large applies, and (c) after apply - verify changes, commit your configurations and document significant changes.
+  - Whenever a TF project has different sub-directories of different even if similar Terraform configurations, `terraform init` has to be run seperately for each of these sub-directories so that their respective configurations are initialized.
+  - Marking a variable as `sensitive = true` does not prevent it from being written to state. It only ensures that the value is redacted in the CLI output and logs, but still stored in the state file. Therefore, the state file can contain sensitive values in plaintext by default. That is, if such values are not flagged as `sensitive = true`.
+  - Protecting secrets is reliably through remote backend with encryption at reast.
+
 
  ### Basics of HashiCorp Configuration Language (HCL)
  - Code is generally organized into blocks and these are like kind of containers that group related configuration together.
@@ -137,7 +142,6 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
 
  (vii) module - reusable configurations that group related resources together so that they can share configuration. `version` argument can be included in the `module` block that sources from a registry to pin down a specific modudle release and avoid unneccesary upgrades, (viii) import - pulling in existing resources into TF management
 
-
 ### Resource Referencing
 - HCL supports dynamic configurations whereby Terraform uses the properties from one resource as an input in another, avoiding hardcoding.
 - Terraform also automatically maps dependencies by determining the order of resource creation based on references. This is called implicit dependency.
@@ -164,8 +168,14 @@ This can be modified through the `-parallelism` flag.
 Terraform CLI generally provides unified workflow that ensures consistency and repeatability.
 
 `terraform init` - to initialize the terraform backend server based on the defined utility provider. It's the first command to run in a new Terraform project. It produces `.terraform` directory (advisable to be .gitignored, not a source code and should not be committed) which contains the `providers` and `modules` sub-directories. 
+
+`terraform init -reconfigure` allows you to reconfigure the backend without copying the exisiting state. It supports changing the backend configuration without transfering the existing state data.
+
+`terraform init -migrate-state` is used to migrate state data from one backend to another, rather than simply reconfiguring the backend without copying the existing state.
+
 The `.terraform/providers` stores cached versions of the configuration's providers - a kinda toolbox needed by TF to get its work done. The `.terraform/modules` contains downloaded versions of modules referenced in the configurarion files. 
 The command is also going to be required anytime the backend settings changed (provider version, provider change), the module is updated with a new one, etc. `init` also produces `.terraform.lock.hcl` in the working directly. This file is expected to be committed, because it ensures everyone working on the project CI/CD uses the same provider version. 
+
 The `.terraform.lock.hcl` file locks dependency versions for consistency across your working environment. `terraform init -upgrade` can be run to upgrade existing providers and modules' versions.
 
 `terraform plan` - Previews changes to be applied. It generates an execution plan that shows the changes TF will make to the real-world resources to match the desired state configuration. The plan shows the resources to be created, giving the opportunity to revise and avoid unintended changes. This is the first time that TF reaches out to the providers' platform through its APIs. 
@@ -216,9 +226,9 @@ to create it in its next `terraform apply`. Resources not managed bt TF are not 
   - `terraform state push` - overwrite state by pushing local file to statefile
   - `terraform state replace-provider` - replace a provider (like AWS) in the state file
   - `terraform state rm` - remove item from state
-  - `terraform state show` - show item in state
+  - `terraform state show` - shows a specified item, resource address, in state
 
-`terraform show` - to display information about your managed infrastructure.
+`terraform show` - to display information about your managed infrastructure. Displays the entire state file without requiring any additional arguments
 
 `terraform import` - to bring existing infrastructure under Terraform's management
 
@@ -265,3 +275,8 @@ Then, `vcp_id = local.vcp` will point to the vcp in the locals. For `module.vpc_
 - Comparing data sources with variables: variables are static and datasources are dynamic.
 
 ### HCP Terraform
+- The purpose of a run trigger in HCP Terraform is to automatically queue a new run in one workspace after another workspace applies succesfully. This helps in orchestrating the workflow and dependencies between different workspaces and ensuring that changes are applied in the correct order.
+- The recommended steps (workflow) for deploying a new resource in a HCP terraform connected to a version-controlled system repository is (a) add the new resource block to the TF configuration in the repo, -> (b) open a pull request with the change, -> (c) after the plan is generated, approve the apply in HCP terraform.
+- When running terraform plan in a CLI-driven workflow with HCP Terraform, the plan operation is executed on the HCP terraform infrastructure and the results are then streamed back to your terminal for review and analysis. This allows you to see the planned changes and the potential impacts directly from the HCP Terraform environment.
+- The HCP Terraform private registry allows you yo publish and maintain a set of custom modules that are only accesible within your organization.
+- The HCP Terraform agents are responsible for executing Terraform runs in the HCP environment. They do not have the functionality to publish and maintain custom modules for organizations.
