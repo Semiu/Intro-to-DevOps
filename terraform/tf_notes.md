@@ -99,7 +99,13 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
     ```
     - When alias is not provided in a provider bloc, and resource not referencing an alias is assumed to be for the provider without alias.
 
-  (ii) resource - the infra created, updated and deleted, 
+  (ii) resource - the infra created, updated and deleted, When resource name is being changed, to avoid complete deletion and new creation, the `moved` bloc can be used to move the old resource address to a new one.
+  ```terraform
+      moved{
+        from = aws_instance.web
+        to = aws_instance.web_new
+      }
+  ```
   (iii) data - to retrieve information about existing resources. This does not create a new resource; best used for existing infra not to be created or managed by TF bfut needs its data for TF's usage
   The data block helps in querying to retrieve such information, 
     ```terraform 
@@ -141,7 +147,24 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
 
  (vi) terraform - settings like version about TF, the backend setting, S3/dynamo db to be used for remote state file management, etc. in essence, it sets up global configuration of the TF to be used in a project
 
- (vii) module - reusable configurations that group related resources together so that they can share configuration. `version` argument can be included in the `module` block that sources from a registry to pin down a specific modudle release and avoid unneccesary upgrades, (viii) import - pulling in existing resources into TF management
+ (vii) module - reusable configurations that group related resources together so that they can share configuration. `version` argument can be included in the `module` block that sources from a registry to pin down a specific module release and avoid unneccesary upgrades. TF modules can be passed inputs through the consuming root module. However, for this to be possible, the imported module must have declared the variable with or without a default value.
+ A variable value assigned to the imported module can be dynamically accessed by the root module if the variable is declared as outputs in the importing module.
+
+ ```terraform 
+    module "mymodudle"{
+      source = "./mymodule"
+      myValue = "123" # here my value must have been declared as variable in the source module's variable
+    }
+    module "other_module"{
+      public_ip = module.mymodule.instance_public_ip
+    }
+    # In ./mymodule/output.tf
+    output "instance_public_ip"{
+      value = aws_instance.myinstance.public_ip
+    }
+ ```
+ 
+ (viii) import - pulling in existing resources into TF management
 
 ### Resource Referencing
 - HCL supports dynamic configurations whereby Terraform uses the properties from one resource as an input in another, avoiding hardcoding.
@@ -221,8 +244,10 @@ to create it in its next `terraform apply`. Resources not managed bt TF are not 
 
 `terraform console` - used to demonstrate TF commands, functions, for example, reading terraform configuration, all through the CLI.
 
-`terraform state` - to manage/ manipulate items in the state file. `terraform state list` lists the resources being managed by the state file at the time. Other `terraform state` related commands are:
-  - `terraform state mv` - move an item in the state (or rename)
+`terraform state` - to manage/ manipulate items in the state file. 
+
+`terraform state list` lists the resources being managed by the state file at the time. Other `terraform state` related commands are:
+  - `terraform state mv` - move an item in the state (or rename). The `moved` bloc addresses this in the Terraform's HCL
   - `terraform state pull` - pull current state and outpfut to stdout
   - `terraform state push` - overwrite state by pushing local file to statefile
   - `terraform state replace-provider` - replace a provider (like AWS) in the state file
@@ -232,6 +257,8 @@ to create it in its next `terraform apply`. Resources not managed bt TF are not 
 `terraform show` - to display information about your managed infrastructure. Displays the entire state file without requiring any additional arguments
 
 `terraform import` - to bring existing infrastructure under Terraform's management
+
+`terraform workspace` - new, list, show, select and delete terraform workspaces
 
 `ssh -i webkey ubuntu@54.167.108.53` where ubuntu is the EC2 (Elastic Compute Cloud) AMI, and 54.167.108.53 is the public ip
 
