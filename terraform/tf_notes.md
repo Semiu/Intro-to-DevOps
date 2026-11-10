@@ -71,9 +71,12 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
     ```terraform
         variable "image_id" = {
             type = string
+            sensitive = true # To prevent being output into console during TF plan and apply, but still accessible in the state file.
         }
     ```
  - Variables are usually declared in `variables.tf` file, but assigned values in a `.tfvars` file which could be more than one. For example, you can have `prod.tfvars` and `dev.tfvars` which assign different variable values, based on the environment, to the same variable declared in the `variables.tf` file.
+ - Variable can also be validated through a conditional statement that checks if the provided value meets the condition. This is known as validation rule.
+ - You can use `sensiitve` in input variable to prevent TF from outputing it during plan and apply. The exception to this is if the said sensitive parameter is used as part of another concatenated output variable.
  - There is also `output` as a block name. They are used in writing out resource attributes. For example, an EC2 instance's public IP address can be read out, even as input for another variable value.
  - Embrace appropriate use of file extensions, formatting, organization, commenting and documentations, and avoid using hard-coded values.
  - TF supports equality `==`, `!=`, `>`, `>`, `<=`, `>=`, `&&`, `||`, and unary `!`
@@ -124,7 +127,9 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
       }
     ```
 
- (iv) variable - reusable code with defined values that can be customized. Helps in parameterizing configurations with different variables required in dyanmic setups environments.
+ (iv) variable - reusable code with defined values that can be customized. Helps in parameterizing configurations with different variables required in dynamic setups environments.
+ There are three types of variables in Terraform. Namely, the input variable which is defined by the `variable` keyword; the `output` variable, also with the `output` keyword
+ and used to dynamically pass values, especially from importing modules to root (consuming) modules, and local, using the `locals` keyword.
  This, therefore, helps in code reusability.
     ```terraform 
       variable "vm_datacenter_east" {
@@ -137,7 +142,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
   The primitive variable types are string, number, bool. The good thing about specifying the data type is, it enforces the type of the value that can be passed to the variable.
   Complex variable types are List (ordered list that can be accessed through index), Set (unique unordered list that cannot be accessed through index), Map (key-value pair).
   Variable can be accessed through `var.<variable_name>` structure in single value variable. 
-  There are different ways of seeting values for variables - (a) setting from the default value attribute when the variable is declared, (b) using the environment variable (TF_VAR used in session), 
+  There are different ways of setting values for variables - (a) setting from the default value attribute when the variable is declared, (b) using the environment variable (TF_VAR used in session), 
   (c) `.tfvars` file which serves like a config file, but dedicated to set variable values, and (d) command line using the `-var="key=value` to set up a specific variable value. 
   The CLI variable set overrides the default values and those in `.tfvars` files. 
   The order of precedence - how terraform resolves variable values from different sources: i. command line flags -> ii. *.auto.tfvars files -> iii. *.tfvars -> iv. environment variables -> v. variable block defaults
@@ -198,7 +203,7 @@ Terraform CLI generally provides unified workflow that ensures consistency and r
 `terraform init -migrate-state` is used to migrate state data from one backend to another, rather than simply reconfiguring the backend without copying the existing state.
 
 The `.terraform/providers` stores cached versions of the configuration's providers - a kinda toolbox needed by TF to get its work done. The `.terraform/modules` contains downloaded versions of modules referenced in the configurarion files. 
-The command is also going to be required anytime the backend settings changed (provider version, provider change), the module is updated with a new one, etc. `init` also produces `.terraform.lock.hcl` in the working directly. This file is expected to be committed, because it ensures everyone working on the project CI/CD uses the same provider version. 
+The command is also going to be required anytime the backend settings changed (provider version, provider change), the module is updated with a new one, etc. `init` also produces `.terraform.lock.hcl` in the working directory. This file is expected to be committed, because it ensures everyone working on the project CI/CD uses the same provider version. 
 
 The `.terraform.lock.hcl` file locks dependency versions for consistency across your working environment. `terraform init -upgrade` can be run to upgrade existing providers and modules' versions.
 
@@ -288,6 +293,8 @@ There is AWS Cloud Control API for providers without standards AWS APIs
   - A record is written in the dynamodb table when a `terraform apply` is applied. 
   - When someone also makes the `terraform apply`, TF firstly checks the dynamodb table and only applies when there is no existing lock.
 - When the `terraform.tfstate` file is deleted, Terraform does not know the remote state anymore, so it has to be manually re-created.
+- Secrets can be stored in a local state file. Only a remote state won't make state file saved in disk, but rather in memory.
+- Security can be further enhanced on the remote state file storage - enabling encryption at rest, restricted access to only the TF admins, backend TLS
 
 ### Data sources
 - These are used in reading resources' output variable values
