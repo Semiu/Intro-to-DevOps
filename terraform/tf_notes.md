@@ -297,7 +297,8 @@ There is AWS Cloud Control API for providers without standards AWS APIs
 - Security can be further enhanced on the remote state file storage - enabling encryption at rest, restricted access to only the TF admins, backend TLS
 
 ### Data sources
-- These are used in reading resources' output variable values
+- These are used in reading resources' output variable values. They allow data to be fetched or computed even from outside Terraform resources.
+- While resources are created, datasources are looked up to for information retrieval.
 - The three common used data sources are (i) `aws_caller_identity` - to get access to the effective Account ID, User ID and ARN that TF is authorized for, (ii) vpc id, and 
 - `locals` is a keyword in passing variables values in TF. 
 ```terraform
@@ -312,6 +313,16 @@ Then, `vcp_id = local.vcp` will point to the vcp in the locals. For `module.vpc_
 ### HCP Terraform
 - The purpose of a run trigger in HCP Terraform is to automatically queue a new run in one workspace after another workspace applies succesfully. This helps in orchestrating the workflow and dependencies between different workspaces and ensuring that changes are applied in the correct order.
 - The recommended steps (workflow) for deploying a new resource in a HCP terraform connected to a version-controlled system repository is (a) add the new resource block to the TF configuration in the repo, -> (b) open a pull request with the change, -> (c) after the plan is generated, approve the apply in HCP terraform.
-- When running terraform plan in a CLI-driven workflow with HCP Terraform, the plan operation is executed on the HCP terraform infrastructure and the results are then streamed back to your terminal for review and analysis. This allows you to see the planned changes and the potential impacts directly from the HCP Terraform environment.
+- When running terraform plan in a CLI-driven workflow with HCP Terraform, the plan operation is executed on the HCP terraform infrastructure and the results are then streamed back to your terminal for review and analysis. 
+- This allows you to see the planned changes and the potential impacts directly from the HCP Terraform environment.
 - The HCP Terraform private registry allows you to publish and maintain a set of custom modules that are only accesible within your organization.
 - The HCP Terraform agents are responsible for executing Terraform runs in the HCP environment. They do not have the functionality to publish and maintain custom modules for organizations.
+
+### Terraform Cloud
+- Terraform cloud workspaces are different than the local TF workspaces.
+- Local workspaces still use the same directory, with the same variables and credentials. The state is empty for every workspace, but the state is just another
+file within the same project.
+- Terraform cloud is more isolated - every project is with its own variable, secrets, credentials and state. State supports multiple versions.
+- Workspace is recommended in Terraform cloud to split monolithic teraform projects into smaller projects.
+- Terraform Cloud has Sentinel, a paid feature that provides embedded policy-as-code framework.
+- Sentinel allows administrators to write policy rules (encryption, S3, tag, etc) to put controls in place to prptect or restrict what can be applied to the infrastructure
