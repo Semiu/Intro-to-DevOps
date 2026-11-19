@@ -4,23 +4,25 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
 
 ###  General Notes
  - Data sources can be defined and reused in another resource by using the dot`[.]` operation as access pointer. For example, `data.ami_virtual.ubuntu.id` is pointing to a data map defined, named `data` and with `ami_virtual` and `ubuntu` as identifiers.
- - ![Terraform registry](https://registry.terraform.io/) is a resource for samples of this data sources. There is also ![Terrafrom HashiCorp developer note](https://developer.hashicorp.com/terraform/intro) for documentation and learning resources on Terraform. The TF built-in functions like `file`, `join`, etc. are enumerated in this documentation.
+ - ![Terraform registry](https://registry.terraform.io/) is a resource for samples of this data sources. There is also ![Terrafrom HashiCorp developer note](https://developer.hashicorp.com/terraform/intro) for documentation and learning resources on Terraform. 
+ - The TF built-in functions like `file`, `join`, etc. are enumerated in this documentation.
  - The provider section of the Terraform's registry, among others, extensively describe the resource templates and the attribute reference. There are resource names, resource types, etc, such as `public_ip` and `public_subnets` that must be written as defined in the Terraform documentation.
- - Error of `Your query returned no results` when `aws_ami` , or any resource name, is used is often caused by (1) no available resource in the definition within the specified region, (2) name filter match with the current naming convention.
+ - Error of `Your query returned no results` when `aws_ami`, or any resource name, is used is often caused by (1) no available resource in the definition within the specified region, (2) name filter match with the current naming convention.
  - Terraform state, tracked by the `terraform.tfstate` file, is the kept and consistently updated records of resources managed by Terraform. When `terraform apply` is executed, terraform compares the record in its state with the actual record, that is available service in the actual environment. 
  - If the `terraform.tfstate` file is accidentally deleted, Terraform can no longer track the resources and the next plan might recreate or dcuplicate resources
  - Another important and related file is the `terraform.tfstate.backup` which backs up the previous state file before Terraform writes anything new to the state file. It is used for recovery in case of accidental modification.
    It will then plan for creating or modifying the services as defined in the terraform file, if it does not exist in the actual environment.
  - Idempotency - due to the state tracking, it does not matter the number of times the `terraform apply` is run, it will only apply once as the state would indicate that the service is already in place.
  - Drift - when a service is already in the computing environment, but not tracked by Terraform state, it is recommended such service is imported into the terraform state for immediate and subsequent management to avoid duplication because TF would re-create resources that the state has no knowledge of.
- - There are terraform state commands that can be used to manipulate the state without a complete destuction of the existing resource, especially if it is just trivial activiites like file naming, resource migration, etc. These are further described in the `Commands and their uses` section.
+ - There are terraform state commands that can be used to manipulate the state without a complete destruction of the existing resource, especially if it is just trivial activiites like file naming, resource migration, etc. These are further described in the `Commands and their uses` section.
  - Almost every thing you build, especially as resource, has its TF-recognizable resource type name which must conform. This also applies to field name within the resource.
  - The Terraform workflow starts with (i) write - creating and modifying the TF configuration files (this is done by you), (ii) plan - preview changes before applying them (TF does this based on what it sees in the configuration files),
    (iii) apply - TF now implements the configuration written and planned. Best practices for `terraform apply` include (a) before apply - always review plan; ensure in you're in the right directory; test in non-production, (b) during apply - read the plan carefully,
    watch for unexpected changes; be patient with large applies, and (c) after apply - verify changes, commit your configurations and document significant changes.
   - Whenever a TF project has different sub-directories of different even if similar Terraform configurations, `terraform init` has to be run seperately for each of these sub-directories so that their respective configurations are initialized.
-  - Marking a variable as `sensitive = true` does not prevent it from being written to state. It only ensures that the value is redacted in the CLI output and logs, but still stored in the state file. Therefore, the state file can contain sensitive values in plaintext by default. That is, if such values are not flagged as `sensitive = true`.
-  - Protecting secrets is reliably through remote backend with encryption at reast.
+  - Marking a variable as `sensitive = true` does not prevent it from being written to state. It only ensures that the value is redacted in the CLI output and logs, but still stored in the state file. Therefore, the state file can contain sensitive values in plaintext by default. 
+  -  You can use `sensiitve` in input variable to prevent TF from outputing it during plan and apply. The exception to this is if the said sensitive parameter is used as part of another concatenated output variable. That is, if such values are not flagged as `sensitive = true`.
+  - Protecting secrets is reliably through remote backend with encryption at rest.
 
 
  ### Basics of HashiCorp Configuration Language (HCL)
@@ -76,7 +78,6 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
     ```
  - Variables are usually declared in `variables.tf` file, but assigned values in a `.tfvars` file which could be more than one. For example, you can have `prod.tfvars` and `dev.tfvars` which assign different variable values, based on the environment, to the same variable declared in the `variables.tf` file.
  - Variable can also be validated through a conditional statement that checks if the provided value meets the condition. This is known as validation rule.
- - You can use `sensiitve` in input variable to prevent TF from outputing it during plan and apply. The exception to this is if the said sensitive parameter is used as part of another concatenated output variable.
  - There is also `output` as a block name. They are used in writing out resource attributes. For example, an EC2 instance's public IP address can be read out, even as input for another variable value.
  - Embrace appropriate use of file extensions, formatting, organization, commenting and documentations, and avoid using hard-coded values.
  - TF supports equality `==`, `!=`, `>`, `>`, `<=`, `>=`, `&&`, `||`, and unary `!`
@@ -84,7 +85,7 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
  - Considering the difference between `count` and `for_each`: For a conditional statement of whether a resource should be created or not (1 or 0), `count` will be sufficient. However, when it becomes two or more resources, `count` is limited in versatility because it works with List data type and a deletion of one item in the list will make the access index number to shift, breaking the access. Map data type, where `for_each` shines solves this problem because key/value is used (not the index) as access point and they do not change based on item deletion.
  - Terraform block types are:
   (i) Provider - to connect TF to cloud platforms, 
-    - When using multiple providers in the same configuration files, we need to provide the `alias` attribute for each of these providers. Therefore, the provider alias is now referenced in each of the resource block.
+    - When usingthe same provider of different multiple configurations in the same project, we need to provide the `alias` attribute for each of these configurations. Therefore, the provider alias is now referenced in each of the resource block.
     ```terraform
       provider "aws"{
         alias = "dev"
@@ -104,12 +105,12 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
 
   (ii) resource - the infra created, updated and deleted, When resource name is being changed, to avoid complete deletion and new creation, the `moved` bloc can be used to move the old resource address to a new one.
   ```terraform
-      moved{
+      moved {
         from = aws_instance.web
         to = aws_instance.web_new
       }
   ```
-  (iii) data - to retrieve information about existing resources. This does not create a new resource; best used for existing infra not to be created or managed by TF bfut needs its data for TF's usage
+  (iii) data - to retrieve information about existing resources. This does not create a new resource; best used for existing infra not to be created or managed by TF but needs its data for TF's usage
   The data block helps in querying to retrieve such information, 
     ```terraform 
       data "aws_vpc" "prod"{
@@ -128,9 +129,10 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
     ```
 
  (iv) variable - reusable code with defined values that can be customized. Helps in parameterizing configurations with different variables required in dynamic setups environments.
- There are three types of variables in Terraform. Namely, the input variable which is defined by the `variable` keyword; the `output` variable, also with the `output` keyword
+ There are three types of variables in Terraform, namely, the input variable which is defined by the `variable` keyword; the `output` variable, also with the `output` keyword
  and used to dynamically pass values, especially from importing modules to root (consuming) modules, and local, using the `locals` keyword.
  This, therefore, helps in code reusability.
+
     ```terraform 
       variable "vm_datacenter_east" {
         description = "name of the datacenter"
@@ -156,9 +158,9 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
  A variable value assigned to the imported module can be dynamically accessed by the root module if the variable is declared as outputs in the importing module.
 
  ```terraform 
-    module "mymodudle"{
+    module "from_mymodule"{
       source = "./mymodule"
-      myValue = "123" # here my value must have been declared as variable in the source module's variable
+      myValue = "123" # here my value must have been declared as variable in the source (mymodule) module's variable
     }
     module "other_module"{
       public_ip = module.mymodule.instance_public_ip
@@ -184,6 +186,8 @@ Terraform works well with software automation tools like Ansible, anyway. Jenkin
 - Dependencies could be implicit or explicit. The implicit dependencies are automatic references to another resource that Terraform already knows about. The explicit is manual, needed to state when TF cannot automatically identify the dependencies. The argument `depends_on` is used for explicit dependency.
 - Terraform walks the resource graph through parrallel execution. This means nodes are processed as soon as their dependencies are satisfied and the non-dependent resources are created/modified simultaneously. The default configuration in Terraform allows it to manage 10 operations in parrallel.
 This can be modified through the `-parallelism` flag. 
+- `terraform apply -parallelism=5` - used in modifying the default number (i.e. 10) of the parrallel operations that TF can apply. Parallelism flag can be applied to `plan`, `apply` and `destroy`. Use cases for applying the parallelism flag to reduce the number of operations to be parallelized are 
+(a) managing providers' API rate limit, or (b) slowing down the operations during debugging and troubleshooting for visual walkthrough.
 
 ### Terraform Core Components
 - Core - this is the CLI tool that provisions and manages the infrastructure resources defined in the TF configuration files.
@@ -203,17 +207,18 @@ Terraform CLI generally provides unified workflow that ensures consistency and r
 `terraform init -migrate-state` is used to migrate state data from one backend to another, rather than simply reconfiguring the backend without copying the existing state.
 
 The `.terraform/providers` stores cached versions of the configuration's providers - a kinda toolbox needed by TF to get its work done. The `.terraform/modules` contains downloaded versions of modules referenced in the configurarion files. 
-The command is also going to be required anytime the backend settings changed (provider version, provider change), the module is updated with a new one, etc. `init` also produces `.terraform.lock.hcl` in the working directory. This file is expected to be committed, because it ensures everyone working on the project CI/CD uses the same provider version. 
+The command is also going to be required anytime the backend settings changed (provider version, provider change), the module is updated with a new one, etc. `init` also produces `.terraform.lock.hcl` in the working directory. 
+This file is expected to be committed, because it ensures everyone working on the project CI/CD uses the same provider version. 
 
 The `.terraform.lock.hcl` file locks dependency versions for consistency across your working environment. `terraform init -upgrade` can be run to upgrade existing providers and modules' versions.
 
-`terraform plan` - Previews changes to be applied. It generates an execution plan that shows the changes TF will make to the real-world resources to match the desired state configuration. The plan shows the resources to be created, giving the opportunity to revise and avoid unintended changes. This is the first time that TF reaches out to the providers' platform through its APIs. 
-Though, it is not required since `terraform apply` can be applied directly but it is advisable so that planned changes are reviewed. To output the TF plan for external saving, use `terraform plan -out`.
+`terraform plan` - Previews changes to be applied. It generates an execution plan that shows the changes TF will make to the real-world resources to match the desired state configuration. The plan shows the resources to be created, giving the opportunity to revise and avoid unintended changes. 
+This is the first time that TF reaches out to the providers' platform through its APIs. Though, it is not required since `terraform apply` can be applied directly but it is advisable so that planned changes are reviewed. To output the TF plan for external saving, use `terraform plan -out`.
 
 `terraform plan -refresh-only` - Will show how the state would be updated to match the current real-world values without making any changes
 
-`terraform plan -out` - helps in situations whereby plans need to be approved before being applied. The output is guaranted to be applied. Saving terraform plan is through `terraform plan -out=myplan_file.tfplan`. The `myplan_file` is a placeholder for any filename. You don't need the extension to be be `.tfplan` either, though it has become a kind of industry convention. 
-Applying the saved plan is through `terraform apply myplan_file.tfplan` command.
+`terraform plan -out` - helps in situations whereby plans need to be approved before being applied. The output is guaranted to be applied. Saving terraform plan is through `terraform plan -out=myplan_file.tfplan`. The `myplan_file` is a placeholder for any filename. 
+You don't need the extension to be be `.tfplan` either, though it has become a kind of industry convention. Applying the saved plan is through `terraform apply myplan_file.tfplan` command.
 
 `terraform apply` - Apply (Plans and provisions) the resources based on the declaration. Needs to be confirmed by a `yes` input in the prompt. When no change made to the declared resource after it is already ran, it does nothing.
 The `apply` operation involves (i) state locking - the state file is locked to avoid concurrent modifications, (ii) state file is updated for each resource when it is succesfully created/modified/destroyed (not at the end of all the operations),
@@ -226,9 +231,6 @@ TF apply can be done in varieties of ways: (i) The `terraform apply` way where y
 `terraform apply -target [target-module]` - used to target a particular module for terraform apply. The `[target-module]` can be `module.vpc`, for example.
 
 `terraform apply -refresh-only` - updates the state file and can write changes
-
-`terraform apply -parallelism=5` - used in modifying the default number (i.e. 10) of the parrallel operations that TF can apply. Parallelism flag can be applied to `plan`, `apply` and `destroy`. Use cases for applying the parallelism flag to reduce the number of operations to be parallelized are (a) managing providers' API rate limit, or 
-(b) slowing down the operations during debugging and troubleshooting for visual walkthrough.
 
 `terraform taint [resource-name]` - is used when a partiular resource is needed to be re-created. An example in the `terraform/first-steps` directory is `aws_instance.web`. The `terraform apply` command would then be applied to complete the re-creation.
 
